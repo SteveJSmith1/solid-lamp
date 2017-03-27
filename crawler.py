@@ -63,24 +63,6 @@ def wikipediaWalk(url, walk_length, fetch='random'):
     return walk_urls
 
 
-def walkToPhilosophy(url):
-    import time
-    walk_urls = []
-    walk_urls.append(url)
-    while url.endswith('Philosphy') is not True:
-        url = getWikiLink(url, fetch=0)
-        walk_urls.append(url)
-        print(url)
-        time.sleep(1)
-    
-    return len(walk_urls)
-
-"""
-Fetch the first link from each wiki page
-"""
-url = 'https://en.wikipedia.org/wiki/Sheep'
-
-walkToPhilosophy(url)
 
 """
 Fetch the first link from each wiki page
