@@ -17,47 +17,55 @@ from soupify import soupify
 
 
 
-def fetchURL(bsobj, fetch='random'):
-    link_list = bsobj.select('p a')
+def getRandomURL(bsobj):
+    
+    link_list = bsobj.select('a')
     if len(link_list) == 0:
         print("No URLs found")
         return None
     else:
-        if fetch == 'random':
-            import random
-            choice = random.randint(0, len(link_list) - 1)
-            url = link_list[choice].get('href')
-        else:
-            url = link_list[fetch].get('href')
+        import random
+        choice = random.randint(0, len(link_list) - 1)
+        url = link_list[choice].get('href')
+        
     return url
   
 
-def getWikiLink(url, fetch='random'):
-    
+def getRandomWikiURL(url):
     bsobj = soupify(url)
-
-    new_url = fetchURL(bsobj, fetch=fetch)
-    if new_url.startswith('/wiki'):
-
-        return 'https://en.wikipedia.org' + new_url
-    else:
-        return getWikiLink(url, fetch='random')
+    new_url = getRandomURL(bsobj)
+    while new_url.startswith('/wiki') is not True:
+        new_url = getRandomURL(bsobj)
+    
+    checks = [':', '#', '?']
+    
+    while any(char in new_url for char in checks):
+        
+        new_url = getRandomWikiURL(new_url)
+        
+    return 'https://en.wikipedia.org' + new_url
+    
 
   
 
 
-def wikipediaWalk(url, walk_length, fetch='random'):
+def wikipediaWalk(url, walk_length):
     import time
     walk_urls = []
+    walk_urls.append(url)
+    
     for i in range(walk_length):
         try:
             print(url)
-            url = getWikiLink(url, fetch=fetch)
+            url = getRandomWikiURL(url)
             if url is not None:
-                walk_urls.append(url)
-                time.sleep(1)
+                if url in walk_urls:
+                    url = getRandomWikiURL(walk_urls[-1])
+                else:
+                    walk_urls.append(url)
+                    time.sleep(1)
             else:
-                url = getWikiLink(walk_urls[-1], fetch=fetch)
+                url = getRandomWikiURL(walk_urls[-1])
         except:
             continue
     return walk_urls
@@ -68,15 +76,10 @@ def wikipediaWalk(url, walk_length, fetch='random'):
 Fetch the first link from each wiki page
 """
 url = 'https://en.wikipedia.org/wiki/Sheep'
-walk_length = 30
-
-wikipediaWalk(url, walk_length, fetch=0)
-
-"""
-Fetch a random link from each wiki page
-"""
-url = 'https://en.wikipedia.org/wiki/Sheep'
 walk_length = 10
 
-wikipediaWalk(url, walk_length)
+urls = wikipediaWalk(url, walk_length)
+
+
+
    
