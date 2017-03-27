@@ -17,51 +17,65 @@ from soupify import soupify
 
 
 
-def randomURL(bsobj):
-    import random
+def fetchURL(bsobj, fetch='random'):
     link_list = bsobj.select('p a')
     if len(link_list) == 0:
         print("No URLs found")
         return None
     else:
-        choice = random.randint(0, len(link_list) - 1)
-        url = link_list[choice].get('href')
-        return url
-    
+        if fetch == 'random':
+            import random
+            choice = random.randint(0, len(link_list) - 1)
+            url = link_list[choice].get('href')
+        else:
+            url = link_list[fetch].get('href')
+    return url
+  
 
-def randomWiki(url):
+def getWikiLink(url, fetch='random'):
     
     bsobj = soupify(url)
 
-    new_url = randomURL(bsobj)
+    new_url = fetchURL(bsobj, fetch=fetch)
     if new_url.startswith('/wiki'):
 
         return 'https://en.wikipedia.org' + new_url
     else:
-        return randomWiki(url)
+        return getWikiLink(url, fetch='random')
+
+  
 
 
-
-
-def wikipediaWalk(url, walk_length):
+def wikipediaWalk(url, walk_length, fetch='random'):
     import time
     walk_urls = []
     for i in range(walk_length):
         try:
             print(url)
-            url = randomWiki(url)
+            url = getWikiLink(url, fetch=fetch)
             if url is not None:
                 walk_urls.append(url)
                 time.sleep(1)
             else:
-                url = randomWiki(walk_urls[-1])
+                url = getWikiLink(walk_urls[-1], fetch=fetch)
         except:
             continue
     return walk_urls
 
-url = 'https://en.wikipedia.org/wiki/Turnip'
-walk_length = 20
+
+"""
+Fetch the first link from each wiki page
+"""
+url = 'https://en.wikipedia.org/wiki/Sheep'
+walk_length = 10
+
+wikipediaWalk(url, walk_length, fetch=0)
+
+"""
+Fetch a random link from each wiki page
+"""
+url = 'https://en.wikipedia.org/wiki/Sheep'
+walk_length = 10
 
 wikipediaWalk(url, walk_length)
-
    
